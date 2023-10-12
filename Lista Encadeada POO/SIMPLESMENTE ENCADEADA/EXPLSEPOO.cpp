@@ -25,11 +25,13 @@ public:
     }
     void addToTopo(int);
     void addToResto(int);
+    void addOrdered();
     void deleteFromTopo();
     void deleteFromResto();
-    void deleteNode(int);
+    void deleteNode();
     bool isInList(int) const;
     void printALL() const;
+    void organize();
 
 private:
     IntSLLNode *topo, *resto;
@@ -49,6 +51,26 @@ void IntSLList::addToResto(int el){
     }else{
         topo = resto = new IntSLLNode(el);
     }
+}
+
+void IntSLList::addOrdered(){
+    organize();
+    int el;
+    cout<<"Digite um valor a ser inserido na lista: ";
+    cin>>el;
+    IntSLLNode* novoNode = new IntSLLNode(el);
+    if(topo == nullptr || el <= topo->info){
+        novoNode->prox = topo;
+        topo = novoNode;
+    }else{
+       IntSLLNode* tmp = topo;
+       while(tmp->prox != nullptr && tmp->prox->info < el){
+        tmp = tmp->prox;
+       }
+       novoNode->prox = tmp->prox;
+       tmp->prox = novoNode;
+    }
+
 }
 
 void IntSLList::deleteFromTopo(){
@@ -88,8 +110,54 @@ void IntSLList::printALL() const{
     cout << endl;
 }
 
+void IntSLList::organize(){
+    if (topo == 0 || topo->prox == 0) {
+        return; // Lista vazia ou com apenas um elemento já está ordenada
+    }
+    bool troca;
+    IntSLLNode* ptr1;
+    IntSLLNode* lptr = nullptr;
+    do {
+        troca = false;
+        ptr1 = topo;
+        while (ptr1->prox != lptr) {
+            if (ptr1->info > ptr1->prox->info) {
+                // Troca os dados dos nós
+                int temp = ptr1->info;
+                ptr1->info = ptr1->prox->info;
+                ptr1->prox->info = temp;
+                troca = true;
+            }
+            ptr1 = ptr1->prox;
+        }
+        lptr = ptr1;
+    } while (troca);
+}
+
+void IntSLList::deleteNode(){
+    IntSLLNode* atual = topo;
+    IntSLLNode* anterior = nullptr;
+    int el;
+    cout<<"Digite um valor a ser removido da lista: ";
+    cin>>el;
+    while(atual != nullptr && atual->info != el){
+        anterior = atual;
+        atual = atual->prox;
+    }
+    if(atual != nullptr){
+        if(anterior != nullptr){
+            anterior->prox = atual->prox;
+        }else{
+            topo = atual->prox;
+        }
+        delete atual;
+    }else{
+        cout<<"Elemento nao esta na lista.";
+    }
+    printALL();
+}
+
 int main(){
-    //int el;
     IntSLList list;
     list.addToTopo(10);
     list.addToTopo(20);
@@ -98,5 +166,13 @@ int main(){
     list.deleteFromTopo();
     list.deleteFromResto();
     list.addToTopo(100);
+    cout<<"Lista antes de ser organizada: "<<endl;
     list.printALL();
+    list.organize();
+    cout<<"Lista apos de ser organizada: "<<endl;
+    list.printALL();
+    list.deleteNode();
+    list.addOrdered();
+    list.printALL();
+    return 0;
 }
