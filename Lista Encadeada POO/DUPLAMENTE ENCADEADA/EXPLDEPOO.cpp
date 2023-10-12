@@ -28,30 +28,97 @@ public:
     }
     void addToTopo(int);
     void addToResto(int);
+    void addOrdered();
     void deleteFromTopo();
     void deleteFromResto();
     void deleteNode();
-    bool isInList(int) const;
     void printALL() const;
+    void organize();
 
 private:
     IntDLLNode *topo, *resto;
 };
 
-bool IntDLList::isInList(int el) const{
-
+void IntDLList::organize(){
+    if (topo == 0 || topo->prox == 0) {
+        return; // Lista vazia ou com apenas um elemento já está ordenada
+    }
+    bool troca;
+    IntDLLNode* ptr1;
+    IntDLLNode* lptr = nullptr;
+    do {
+        troca = false;
+        ptr1 = topo;
+        while (ptr1->prox != lptr) {
+            if (ptr1->info > ptr1->prox->info) {
+                // Troca os dados dos nós
+                int temp = ptr1->info;
+                ptr1->info = ptr1->prox->info;
+                ptr1->prox->info = temp;
+                troca = true;
+            }
+            ptr1 = ptr1->prox;
+        }
+        lptr = ptr1;
+    } while (troca);
 }
 
-void IntDLList::deleteNode(){
+void IntDLList::deleteNode() {
     int num;
-    bool existe;
-    cout << "Digite o numero que deseja excluir: ";
+    cout << "Digite o número que deseja excluir: ";
     cin >> num;
-    existe = isInList(num);
-    if(existe == false){
-        cout<<"Elemento nao esta na lista!";
-    }else{
+    IntDLLNode* atual = topo;
+    while(atual != nullptr && atual->info != num) {
+        atual = atual->prox;
+    }
+    if(atual != nullptr) {
+        if(atual->ante != nullptr && atual->prox != nullptr) {
+            atual->ante->prox = atual->prox;
+            atual->prox->ante = atual->ante;
+        }else if(atual->ante == nullptr){
+            topo = atual->prox;
+            topo->ante = nullptr;
+        }else if(atual->prox == nullptr){
+            resto = atual->ante;
+            resto->prox = nullptr;
+        }
         
+        delete atual;
+    } else {
+        cout << "Elemento não está na lista.";
+    }
+    printALL();
+}
+
+void IntDLList::addOrdered() {
+    organize();
+    int el;
+    cout << "Digite um valor a ser inserido na lista: ";
+    cin >> el;
+    IntDLLNode* novoNode = new IntDLLNode(el);
+    if (topo == nullptr || el <= topo->info) {
+        novoNode->prox = topo;
+        if (topo != nullptr) {
+            topo->ante = novoNode;
+        }
+        topo = novoNode;
+    }else {
+        IntDLLNode* tmp = topo;
+        while (tmp->prox != nullptr && tmp->prox->info < el) {
+            tmp = tmp->prox;
+        }
+        if(tmp->prox == nullptr){
+            resto->prox = novoNode;
+            novoNode->ante = resto;
+            resto = novoNode;
+        }else{
+            novoNode->prox = tmp->prox;
+        novoNode->ante = tmp;
+        if (tmp->prox != nullptr) {
+            tmp->prox->ante = novoNode;
+        }
+        tmp->prox = novoNode;
+        }
     }
 }
 
@@ -105,12 +172,16 @@ void IntDLList::deleteFromResto(){
 }
 
 void IntDLList::printALL() const{
+    cout << "Ordem crescente: \n";
     for(IntDLLNode *tmp = topo; tmp != 0; tmp = tmp->prox){
         cout << tmp->info << " ";
+        cout <<endl;
     }
     cout << endl;
+    cout << "Ordem decrescente: \n";
     for(IntDLLNode *tmp = resto; tmp != 0; tmp = tmp->ante){
         cout << tmp->info << " ";
+        cout <<endl;
     }
     cout << endl;
 }
@@ -125,6 +196,12 @@ int main(){
     list.deleteFromTopo();
     list.deleteFromResto();
     list.addToTopo(100);
+    cout<<"Lista antes de ser organizada: "<<endl;
+    list.printALL();
+    list.organize();
+    cout<<"Lista apos de ser organizada: "<<endl;
     list.printALL();
     list.deleteNode();
+    list.addOrdered();
+    list.printALL();
 }
